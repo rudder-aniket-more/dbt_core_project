@@ -1,6 +1,6 @@
 snapshots:
-  - name: scd_test
-    relation: ref('test_dedup')
+  - name: cdc_plans
+    relation: source('IDEON_RAW', 'PLANS')
     config:
       schema: Bronze
       database: '{{target.database}}'  

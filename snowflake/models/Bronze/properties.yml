@@ -1,0 +1,29 @@
+version: 2
+
+models :
+  - name: plans
+    config:
+      materialized: table
+    columns:
+      - name: id
+        data_tests:
+          - not_null
+          - unique
+
+  # - name: dim_store
+  #   config:
+  #     materialized: table
+  #     schema: bronze
+  #   columns:
+  #     - name: store_sk
+  #       data_tests:
+  #         - not_null
+  #         - unique
+  #     - name: country
+  #       data_tests:
+  #         - not_null
+  #         - accepted_values:
+  #             arguments :
+  #               values : ['USA1', 'Canada']
+  #             config:
+  #               severity: warn

@@ -2,10 +2,10 @@ snowflake:
   outputs:
     dev:
       account: kt52839.ap-south-1.aws
-      database: EXTERNAL_TEAM_DB
+      database: TEST_DEV
       password: "{{ env_var('DBT_SNOWFLAKE_PASS') }}"
       role: ACCOUNTADMIN
-      schema: IDEON_TEST
+      schema: DEV
       threads: 1
       type: snowflake
       user: ANIKET001
