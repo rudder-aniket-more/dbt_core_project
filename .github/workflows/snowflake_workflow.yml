@@ -15,7 +15,7 @@ on:
 jobs:
   ci_checks:
     # This job only runs on a Pull Request event
-    if: github.event_name == 'pull_request' 
+    #if: github.event_name == 'pull_request' 
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
