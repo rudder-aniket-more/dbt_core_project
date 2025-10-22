@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: IDEON_RAW
+    database: EXTERNAL_TEAM_DB
+    schema: IDEON_RAW
+    tables:
+        - name: PLANS
+        - name: PRICINGS
+        - name: ZIP_COUNTIES
+  - name: TEST
+    database: EXTERNAL_TEAM_DB
+    schema: TEST
+    tables:
+        - name: TEST

@@ -1,0 +1,23 @@
+snowflake:
+  outputs:
+    dev:
+      account: kt52839.ap-south-1.aws
+      database: EXTERNAL_TEAM_DB
+      password: "{{ env_var('DBT_SNOWFLAKE_PASS') }}"
+      role: ACCOUNTADMIN
+      schema: IDEON_TEST
+      threads: 1
+      type: snowflake
+      user: ANIKET001
+      warehouse: COMPUTE_WH
+    prod:
+      account: kt52839.ap-south-1.aws
+      database: EXTERNAL_TEAM_DB
+      password: "{{ env_var('DBT_SNOWFLAKE_PASS') }}"
+      role: ACCOUNTADMIN
+      schema: IDEON_TEST
+      threads: 1
+      type: snowflake
+      user: ANIKET001
+      warehouse: COMPUTE_WH
+  target: dev
