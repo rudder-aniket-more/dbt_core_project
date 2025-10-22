@@ -1,6 +1,7 @@
 name: DBT CI/CD Pipeline
 
 on:
+  workflow_dispatch:
   # 1. CI Trigger: Runs when a Pull Request is opened or updated against 'main'
   pull_request:
     branches:
