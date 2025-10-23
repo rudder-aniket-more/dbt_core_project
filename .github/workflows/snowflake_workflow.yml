@@ -1,50 +1,56 @@
-name: DBT CI/CD Pipeline
+name: DBT Main Branch dev Tests
 
 on:
   workflow_dispatch:
-  # 1. CI Trigger: Runs when a Pull Request is opened or updated against 'main'
-  pull_request:
-    branches:
-      - main
-  
-  # 2. CD Trigger: Runs when code is merged (pushed) to the 'main' branch
   push:
     branches:
-      - main
+      - main # 🎯 Triggered on every push to the main branch
 
 jobs:
-  ci_checks:
-    # This job only runs on a Pull Request event
-    #if: github.event_name == 'pull_request' 
+  test_dbt_models:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - uses: dbt-labs/setup-dbt@v1
-      with:
-        dbt-version: 1.10.13 # Use your desired dbt version
+    timeout-minutes: 10
     
-    # 1. Inject Environment Variables (CI uses "dev" secrets)
-    - name: Set CI Credentials
-      run: |
-        echo "DBT_USER=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
-        
-    # 2. Run dbt Dependencies and Clean
-    - name: Install dependencies
-      run: dbt deps
+    # 🎯 Define the path to your nested dbt project folder
+    env:
+      DBT_PROJECT_ROOT: './snowflake'
 
-    # 3. Build only modified models in the temporary schema and run tests
-    - name: Run modified models & tests
-      run: |
-        dbt build \
-          --target dev \
-          --select state:modified+ \
-          --defer
-      # Note: The 'dev' target should be defined in your profiles.yml 
-      # to pick up the temporary $DBT_TARGET_SCHEMA.
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      # --- 1. Setup Environment ---
+      - name: Install Python and dbt
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Use your preferred Python version
+          
+      - name: Install dbt and Adapter
+        run: pip install dbt-core==1.8.0 dbt-snowflake # Adjust dbt version/adapter if necessary
+
+      # --- 2. Inject Credentials (CI uses test secrets) ---
+      - name: Set CI Environment Variables
+        run: |
+          # These secrets must be defined in your GitHub Repository Secrets
+          echo "DBT_USER=${{ secrets.DBT_CI_USER }}" >> $GITHUB_ENV
+          echo "DBT_PASSWORD=${{ secrets.DBT_CI_PASSWORD }}" >> $GITHUB_ENV
+          # Set a unique schema for the CI run for isolation
+          echo "DBT_TARGET_SCHEMA=dbt_ci_${{ github.sha }}" >> $GITHUB_ENV # Use commit SHA for uniqueness
+
+      # --- 3. Execute DBT Commands ---
+      # Crucially, all dbt commands must be executed from the nested 'snowflake' directory.
       
-    # 4. Cleanup (optional, but good practice to drop the temporary schema)
-    - name: Cleanup CI schema
-      if: always() # Run even if previous steps failed
-      run: |
-        dbt run-operation drop_temp_schema --args 'schema_name: ${{ env.DBT_TARGET_SCHEMA }}'
+      - name: Install dbt packages (dbt deps)
+        run: dbt deps
+        working-directory: ${{ env.DBT_PROJECT_ROOT }} # ✅ Directs command to the nested folder
+
+      - name: Run Models and Tests (CI)
+        # Use 'dbt build' to run models, seeds, and tests sequentially.
+        # The '--target ci' profile must be set up in your profiles.yml.
+        run: dbt build --target dev
+        working-directory: ${{ env.DBT_PROJECT_ROOT }} # ✅ Directs command to the nested folder
+        
+      # --- 4. Send Notification on Failure ---
+      - name: Notify on Failure
+        if: ${{ always() && failure() }}
+        run: echo "🚨 DBT CI build failed on main branch (Commit ${{ github.sha }})." # Integrate with Slack/Email here
