@@ -14,7 +14,6 @@ jobs:
     # 🎯 Define the path to your nested dbt project folder
     env:
       DBT_PROJECT_ROOT: './snowflake'
-
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
@@ -32,7 +31,7 @@ jobs:
       - name: Set CI Environment Variables
         run: |
           # These secrets must be defined in your GitHub Repository Secrets
-          echo "DBT_PASSWORD=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
+          echo "DBT_SNOWFLAKE_PASS=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
 
       # --- 3. Execute DBT Commands ---
       # Crucially, all dbt commands must be executed from the nested 'snowflake' directory.
