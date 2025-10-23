@@ -35,7 +35,10 @@ jobs:
     # 4. Run dbt Commands
     - name: Install dbt packages
       run: dbt deps
-
+      
+    - name: Change directory to dbt project
+      run: cd dbt_core_project  
+      
     - name: Run Models and Tests
       # We use 'dbt build' to run models, seeds, snapshots, and tests sequentially.
       # The target 'ci' should be defined in your profiles.yml to use the test schema.
