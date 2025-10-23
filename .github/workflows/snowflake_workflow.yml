@@ -30,10 +30,7 @@ jobs:
     - name: Set Environment Variables for Testing
       run: |
         # Inject secrets securely from GitHub Secrets
-        echo "DBT_USER=${{ secrets.DBT_CI_USER }}" >> $GITHUB_ENV
-        echo "DBT_PASSWORD=${{ secrets.DBT_CI_PASSWORD }}" >> $GITHUB_ENV
-        # Set a dedicated schema for testing to avoid conflicts
-        echo "DBT_TARGET_SCHEMA=dbt_feature1_test" >> $GITHUB_ENV
+        echo "DBT_SNOWFLAKE_PASS=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
       
     # 4. Run dbt Commands
     - name: Install dbt packages
