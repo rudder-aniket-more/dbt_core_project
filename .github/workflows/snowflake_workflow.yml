@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main # 🎯 Triggered on every push to the main branch
-      - ci_checks
+      - ci_check
 
 jobs:
   ci_checks_test:
