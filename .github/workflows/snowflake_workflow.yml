@@ -32,10 +32,7 @@ jobs:
       - name: Set CI Environment Variables
         run: |
           # These secrets must be defined in your GitHub Repository Secrets
-          echo "DBT_USER=${{ secrets.DBT_CI_USER }}" >> $GITHUB_ENV
-          echo "DBT_PASSWORD=${{ secrets.DBT_CI_PASSWORD }}" >> $GITHUB_ENV
-          # Set a unique schema for the CI run for isolation
-          echo "DBT_TARGET_SCHEMA=dbt_ci_${{ github.sha }}" >> $GITHUB_ENV # Use commit SHA for uniqueness
+          echo "DBT_PASSWORD=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
 
       # --- 3. Execute DBT Commands ---
       # Crucially, all dbt commands must be executed from the nested 'snowflake' directory.
@@ -44,7 +41,7 @@ jobs:
         run: dbt deps
         working-directory: ${{ env.DBT_PROJECT_ROOT }} # ✅ Directs command to the nested folder
 
-      - name: Run Models and Tests (CI)
+      - name: Run Models and Tests (dev
         # Use 'dbt build' to run models, seeds, and tests sequentially.
         # The '--target ci' profile must be set up in your profiles.yml.
         run: dbt build --target dev
