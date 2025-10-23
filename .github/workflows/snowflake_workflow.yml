@@ -1,0 +1,50 @@
+name: DBT CI/CD Pipeline
+
+on:
+  workflow_dispatch:
+  # 1. CI Trigger: Runs when a Pull Request is opened or updated against 'main'
+  pull_request:
+    branches:
+      - main
+  
+  # 2. CD Trigger: Runs when code is merged (pushed) to the 'main' branch
+  push:
+    branches:
+      - main
+
+jobs:
+  ci_checks:
+    # This job only runs on a Pull Request event
+    #if: github.event_name == 'pull_request' 
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dbt-labs/setup-dbt@v1
+      with:
+        dbt-version: 1.10.13 # Use your desired dbt version
+    
+    # 1. Inject Environment Variables (CI uses "dev" secrets)
+    - name: Set CI Credentials
+      run: |
+        echo "DBT_USER=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
+        
+    # 2. Run dbt Dependencies and Clean
+    - name: Install dependencies
+      run: dbt deps
+
+    # 3. Build only modified models in the temporary schema and run tests
+    - name: Run modified models & tests
+      run: |
+        dbt build \
+          --target dev \
+          --select state:modified+ \
+          --defer
+      # Note: The 'dev' target should be defined in your profiles.yml 
+      # to pick up the temporary $DBT_TARGET_SCHEMA.
+      
+    # 4. Cleanup (optional, but good practice to drop the temporary schema)
+    - name: Cleanup CI schema
+      if: always() # Run even if previous steps failed
+      run: |
+        dbt run-operation drop_temp_schema --args 'schema_name: ${{ env.DBT_TARGET_SCHEMA }}'
