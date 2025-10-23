@@ -1,50 +1,52 @@
-name: DBT CI/CD Pipeline
+name: Feature Branch Testing (dbt)
 
 on:
   workflow_dispatch:
-  # 1. CI Trigger: Runs when a Pull Request is opened or updated against 'main'
-  pull_request:
-    branches:
-      - main
-  
-  # 2. CD Trigger: Runs when code is merged (pushed) to the 'main' branch
   push:
     branches:
-      - main
+      - main # 🎯 This trigger runs the workflow only on pushes to 'feature1'
 
 jobs:
-  ci_checks:
-    # This job only runs on a Pull Request event
-    #if: github.event_name == 'pull_request' 
+  test_dbt_models:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+    #timeout-minutes: 10 # Fail the job if it runs too long
 
-    - uses: dbt-labs/setup-dbt@v1
+    steps:
+    # 1. Checkout Code
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    # 2. Setup dbt Core
+    # Ensure you are using the correct adapter and version
+    - name: Install Python and dbt
+      uses: actions/setup-python@v5
       with:
-        dbt-version: 1.10.13 # Use your desired dbt version
-    
-    # 1. Inject Environment Variables (CI uses "dev" secrets)
-    - name: Set CI Credentials
+        python-version: '3.11' # Use a stable Python version
+
+    - name: Install dbt and adapter
+      run: pip install dbt-core==1.10.13 dbt-snowflake # Replace dbt-snowflake with your adapter
+
+    # 3. Configure Credentials (Secrets Injection)
+    - name: Set Environment Variables for Testing
       run: |
-        echo "DBT_USER=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
-        
-    # 2. Run dbt Dependencies and Clean
-    - name: Install dependencies
+        # Inject secrets securely from GitHub Secrets
+        echo "DBT_USER=${{ secrets.DBT_CI_USER }}" >> $GITHUB_ENV
+        echo "DBT_PASSWORD=${{ secrets.DBT_CI_PASSWORD }}" >> $GITHUB_ENV
+        # Set a dedicated schema for testing to avoid conflicts
+        echo "DBT_TARGET_SCHEMA=dbt_feature1_test" >> $GITHUB_ENV
+      
+    # 4. Run dbt Commands
+    - name: Install dbt packages
       run: dbt deps
 
-    # 3. Build only modified models in the temporary schema and run tests
-    - name: Run modified models & tests
-      run: |
-        dbt build \
-          --target dev \
-          --select state:modified+ \
-          --defer
-      # Note: The 'dev' target should be defined in your profiles.yml 
-      # to pick up the temporary $DBT_TARGET_SCHEMA.
-      
-    # 4. Cleanup (optional, but good practice to drop the temporary schema)
-    - name: Cleanup CI schema
-      if: always() # Run even if previous steps failed
-      run: |
-        dbt run-operation drop_temp_schema --args 'schema_name: ${{ env.DBT_TARGET_SCHEMA }}'
+    - name: Run Models and Tests
+      # We use 'dbt build' to run models, seeds, snapshots, and tests sequentially.
+      # The target 'ci' should be defined in your profiles.yml to use the test schema.
+      run: dbt build --target ci
+      # Alternatively, you could use: dbt run --target ci && dbt test --target ci
+
+    # 5. Optional: Send Notification on Failure
+    - name: Notify Team on Failure
+      # This step only executes if any preceding step fails
+      if: failure()
+      run: echo "DBT tests failed on the feature1 branch." # Use a dedicated notification action here (e.g., Slack)
