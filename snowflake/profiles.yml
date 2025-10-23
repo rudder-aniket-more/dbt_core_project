@@ -3,7 +3,7 @@ snowflake:
     dev:
       account: kt52839.ap-south-1.aws
       database: EXTERNAL_TEAM_DB
-      password: "{{ env_var('DBT_SNOWFLAKE_PASS') }}"
+      password: SAniket4368@sa
       role: ACCOUNTADMIN
       schema: IDEON_TEST
       threads: 1
@@ -13,7 +13,7 @@ snowflake:
     prod:
       account: kt52839.ap-south-1.aws
       database: EXTERNAL_TEAM_DB
-      password: "{{ env_var('DBT_SNOWFLAKE_PASS') }}"
+      password: SAniket4368@sa
       role: ACCOUNTADMIN
       schema: IDEON_TEST
       threads: 1
