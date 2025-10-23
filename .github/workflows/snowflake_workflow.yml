@@ -37,7 +37,7 @@ jobs:
       run: dbt deps
       
     - name: Change directory to dbt project
-      run: cd dbt_core_project  
+      run: cd snowflake  
       
     - name: Run Models and Tests
       # We use 'dbt build' to run models, seeds, snapshots, and tests sequentially.
