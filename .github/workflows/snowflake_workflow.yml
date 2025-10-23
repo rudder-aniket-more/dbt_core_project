@@ -42,7 +42,7 @@ jobs:
     - name: Run Models and Tests
       # We use 'dbt build' to run models, seeds, snapshots, and tests sequentially.
       # The target 'ci' should be defined in your profiles.yml to use the test schema.
-      run: dbt build --target ci
+      run: dbt build --target dev
       # Alternatively, you could use: dbt run --target ci && dbt test --target ci
 
     # 5. Optional: Send Notification on Failure
