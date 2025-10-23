@@ -1,52 +1,56 @@
-name: Feature Branch Testing (dbt)
+name: DBT Main Branch dev Tests
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main # 🎯 This trigger runs the workflow only on pushes to 'feature1'
+      - main # 🎯 Triggered on every push to the main branch
 
 jobs:
   test_dbt_models:
     runs-on: ubuntu-latest
-    #timeout-minutes: 10 # Fail the job if it runs too long
+    timeout-minutes: 10
+    
+    # 🎯 Define the path to your nested dbt project folder
+    env:
+      DBT_PROJECT_ROOT: './snowflake'
 
     steps:
-    # 1. Checkout Code
-    - name: Checkout repository code
-      uses: actions/checkout@v4
+      - name: Checkout repository code
+        uses: actions/checkout@v4
 
-    # 2. Setup dbt Core
-    # Ensure you are using the correct adapter and version
-    - name: Install Python and dbt
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11' # Use a stable Python version
+      # --- 1. Setup Environment ---
+      - name: Install Python and dbt
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Use your preferred Python version
+          
+      - name: Install dbt and Adapter
+        run: pip install dbt-core==1.8.0 dbt-snowflake # Adjust dbt version/adapter if necessary
 
-    - name: Install dbt and adapter
-      run: pip install dbt-core==1.10.13 dbt-snowflake # Replace dbt-snowflake with your adapter
+      # --- 2. Inject Credentials (CI uses test secrets) ---
+      - name: Set CI Environment Variables
+        run: |
+          # These secrets must be defined in your GitHub Repository Secrets
+          echo "DBT_USER=${{ secrets.DBT_CI_USER }}" >> $GITHUB_ENV
+          echo "DBT_PASSWORD=${{ secrets.DBT_CI_PASSWORD }}" >> $GITHUB_ENV
+          # Set a unique schema for the CI run for isolation
+          echo "DBT_TARGET_SCHEMA=dbt_ci_${{ github.sha }}" >> $GITHUB_ENV # Use commit SHA for uniqueness
 
-    # 3. Configure Credentials (Secrets Injection)
-    - name: Set Environment Variables for Testing
-      run: |
-        # Inject secrets securely from GitHub Secrets
-        echo "DBT_SNOWFLAKE_PASS=${{ secrets.DBT_SNOWFLAKE_PASS }}" >> $GITHUB_ENV
+      # --- 3. Execute DBT Commands ---
+      # Crucially, all dbt commands must be executed from the nested 'snowflake' directory.
       
-    # 4. Run dbt Commands
-    - name: Install dbt packages
-      run: dbt deps
-      
-    - name: Change directory to dbt project
-      run: cd snowflake  
-      
-    - name: Run Models and Tests
-      # We use 'dbt build' to run models, seeds, snapshots, and tests sequentially.
-      # The target 'ci' should be defined in your profiles.yml to use the test schema.
-      run: dbt build --target dev
-      # Alternatively, you could use: dbt run --target ci && dbt test --target ci
+      - name: Install dbt packages (dbt deps)
+        run: dbt deps
+        working-directory: ${{ env.DBT_PROJECT_ROOT }} # ✅ Directs command to the nested folder
 
-    # 5. Optional: Send Notification on Failure
-    - name: Notify Team on Failure
-      # This step only executes if any preceding step fails
-      if: failure()
-      run: echo "DBT tests failed on the feature1 branch." # Use a dedicated notification action here (e.g., Slack)
+      - name: Run Models and Tests (CI)
+        # Use 'dbt build' to run models, seeds, and tests sequentially.
+        # The '--target ci' profile must be set up in your profiles.yml.
+        run: dbt build --target dev
+        working-directory: ${{ env.DBT_PROJECT_ROOT }} # ✅ Directs command to the nested folder
+        
+      # --- 4. Send Notification on Failure ---
+      - name: Notify on Failure
+        if: ${{ always() && failure() }}
+        run: echo "🚨 DBT CI build failed on main branch (Commit ${{ github.sha }})." # Integrate with Slack/Email here
