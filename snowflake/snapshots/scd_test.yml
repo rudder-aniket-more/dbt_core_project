@@ -1,5 +1,5 @@
 snapshots:
-  - name: test_scd
+  - name: scd_test
     relation: ref('test_dedup')
     config:
       schema: test
