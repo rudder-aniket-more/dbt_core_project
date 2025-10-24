@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main # 🎯 Triggered on every push to the main branch
-      - ci_check
+      - '**' # Include all branches
+      - '!main' # Exclude the main branch
 
 jobs:
   ci_checks_test:
