@@ -1,5 +1,6 @@
 name: current_directory
 on : 
+  - workflow_dispatch
   - push 
 jobs :
   current_dire :
