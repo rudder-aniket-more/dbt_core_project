@@ -1,0 +1,14 @@
+name: current_directory
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**' # Include all branches
+      - '!main' # Exclude the main branch
+jobs :
+  current_dire :
+    runs-on :
+      labels: r1
+    steps :
+      - name: print pwd
+        run: pwd
