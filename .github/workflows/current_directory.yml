@@ -1,0 +1,10 @@
+name: current_directory
+on : 
+  - push 
+jobs :
+  current_dire :
+    runs-on :
+      labels: runner1
+    steps :
+      - name: print pwd
+        run: pwd
