@@ -5,7 +5,7 @@ on :
 jobs :
   current_dire :
     runs-on :
-      labels: runner1
+      labels: r1
     steps :
       - name: print pwd
         run: pwd
