@@ -46,6 +46,9 @@ jobs:
           echo "Activating virtual environment..."
           source .venv/bin/activate
 
+      - name: Go to project directory
+        run: cd /home/ec2-user/dbt_setup/snowflake
+        
       - name: Run dbt models
         working-directory: /home/ec2-user/dbt_setup/snowflake
         run: |
