@@ -54,6 +54,4 @@ jobs:
 
       - name: Run dbt models
         working-directory: /home/ec2-user/dbt_setup/snowflake
-        run: |
-          dbt run --profiles-dir .
-          dbt test --profiles-dir .
+        run: dbt build
