@@ -47,7 +47,7 @@ jobs:
           source .venv/bin/activate
 
       - name: Run dbt models
-        working-directory: /home/ec2-user/dbt_setup
+        working-directory: /home/ec2-user/dbt_setup/snowflake
         run: |
           dbt run --profiles-dir .
           dbt test --profiles-dir .
