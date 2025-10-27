@@ -53,6 +53,7 @@ jobs:
       - name: Activate virtual environment
         working-directory: /home/ec2-user/dbt_setup
         run: |
+          git branch
           echo "Activating virtual environment..."
           source .venv/bin/activate
 
