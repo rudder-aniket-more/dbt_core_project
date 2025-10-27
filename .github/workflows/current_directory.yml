@@ -34,12 +34,30 @@ jobs:
       - name: Go to project directory
         run: cd /home/ec2-user/dbt_setup
         
+      # - name: Checkout triggering branch
+      #   uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 0
+      #     ref: ${{ github.ref_name }}
+      
+      - name: Print triggering branch
+        run: echo "Triggered on branch ${{ github.ref_name }}"
+
       - name: Checkout triggering branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.ref_name }}
 
+      - name: Verify branch checkout
+        run: |
+          echo "Current Git branch:"
+          git branch
+          echo "Current directory:"
+          pwd
+          echo "Current commit:"
+          git log -1 --oneline
+          
       # - name: Pull latest code from the same branch that triggered the workflow
       #   working-directory: /home/ec2-user/dbt_setup
       #   run: |
