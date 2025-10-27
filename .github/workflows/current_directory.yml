@@ -50,10 +50,10 @@ jobs:
         run: cd /home/ec2-user/dbt_setup/snowflake
         
       - name: print pwd
-        run: dbt build
+        run: pwd
 
-      - name: Run dbt models
-        working-directory: /home/ec2-user/dbt_setup/snowflake
-        run: |
-          echo "Activating virtual environment..."
-          dbt build
+      # - name: Run dbt models
+      #   working-directory: /home/ec2-user/dbt_setup/snowflake
+      #   run: |
+      #     echo "Activating virtual environment..."
+      #     dbt build
