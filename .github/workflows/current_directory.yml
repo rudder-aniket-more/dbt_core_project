@@ -1,14 +1,53 @@
-name: current_directory
+# name: current_directory
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches:
+#       - '**' # Include all branches
+#       - '!main' # Exclude the main branch
+# jobs :
+#   current_dire :
+#     runs-on :
+#       labels: r1
+#     steps :
+#       - name: print pwd
+#         run: pwd
+
+name: Update and Run dbt Project on Runner
+
 on:
   workflow_dispatch:
   push:
     branches:
       - '**' # Include all branches
       - '!main' # Exclude the main branch
-jobs :
-  current_dire :
-    runs-on :
-      labels: r1
-    steps :
-      - name: print pwd
-        run: pwd
+
+jobs:
+  update-code:
+    name: Pull latest code and update dbt project
+    runs-on: self-hosted  # 👈 your EC2 runner tag
+
+    steps:
+      - name: Go to project directory
+        run: cd /home/ec2-user/dbt_setup
+
+      - name: Pull latest code from GitHub
+        working-directory: /home/ec2-user/dbt_setup
+        run: |
+          echo "Fetching latest code..."
+          git fetch --all
+          git reset --hard origin/main
+          git pull origin main
+          echo "✅ Code updated successfully"
+
+      - name: Activate virtual environment
+        working-directory: /home/ec2-user/dbt_setup
+        run: |
+          echo "Activating virtual environment..."
+          source .venv/bin/activate
+
+      - name: Run dbt models
+        working-directory: /home/ec2-user/dbt_setup
+        run: |
+          dbt run --profiles-dir .
+          dbt test --profiles-dir .
