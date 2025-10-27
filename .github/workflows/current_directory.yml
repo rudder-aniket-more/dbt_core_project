@@ -54,4 +54,6 @@ jobs:
 
       - name: Run dbt models
         working-directory: /home/ec2-user/dbt_setup/snowflake
-        run: dbt build
+        run: |
+          echo "Activating virtual environment..."
+          dbt build
