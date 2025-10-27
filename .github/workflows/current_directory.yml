@@ -43,20 +43,20 @@ jobs:
       - name: Print triggering branch
         run: echo "Triggered on branch ${{ github.ref_name }}"
 
-      - name: Checkout triggering branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref_name }}
+      # - name: Checkout triggering branch
+      #   uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 0
+      #     ref: ${{ github.ref_name }}
 
-      - name: Verify branch checkout
-        run: |
-          echo "Current Git branch:"
-          git branch
-          echo "Current directory:"
-          pwd
-          echo "Current commit:"
-          git log -1 --oneline
+      # - name: Verify branch checkout
+      #   run: |
+      #     echo "Current Git branch:"
+      #     git branch
+      #     echo "Current directory:"
+      #     pwd
+      #     echo "Current commit:"
+      #     git log -1 --oneline
           
       # - name: Pull latest code from the same branch that triggered the workflow
       #   working-directory: /home/ec2-user/dbt_setup
@@ -67,6 +67,19 @@ jobs:
       #     git reset --hard origin/${{ github.ref_name }}
       #     git pull origin ${{ github.ref_name }}
       #     echo "✅ Code updated for branch: ${{ github.ref_name }}"
+
+
+      - name: Fetch latest branches
+        working-directory: /home/ec2-user/dbt_setup
+        run: |
+          echo "Fetching all branches..."
+          git fetch origin
+          git branch -r
+          echo "Switching to branch: ${{ github.ref_name }}"
+          git checkout ${{ github.ref_name }} || git checkout -b ${{ github.ref_name }} origin/${{ github.ref_name }}
+          git reset --hard origin/${{ github.ref_name }}
+          git pull origin ${{ github.ref_name }}
+          git branch
 
       - name: Activate virtual environment
         working-directory: /home/ec2-user/dbt_setup
