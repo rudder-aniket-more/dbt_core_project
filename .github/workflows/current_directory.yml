@@ -28,18 +28,21 @@ jobs:
     runs-on: self-hosted  # 👈 your EC2 runner tag
 
     steps:
+      - name: Identify branch
+        run: echo "🔍 Triggered branch ${{ github.ref_name }}"
+        
       - name: Go to project directory
         run: cd /home/ec2-user/dbt_setup
 
-      - name: Pull latest code from GitHub
+      - name: Pull latest code from the same branch that triggered the workflow
         working-directory: /home/ec2-user/dbt_setup
         run: |
-          git branch
-          echo "Fetching latest code..."
-          git fetch --all
-          git reset --hard origin/main
-          git pull origin main
-          echo "✅ Code updated successfully"
+          echo "Fetching latest code for branch: ${{ github.ref_name }}"
+          git fetch origin ${{ github.ref_name }}
+          git checkout ${{ github.ref_name }} || git checkout -b ${{ github.ref_name }} origin/${{ github.ref_name }}
+          git reset --hard origin/${{ github.ref_name }}
+          git pull origin ${{ github.ref_name }}
+          echo "✅ Code updated for branch: ${{ github.ref_name }}"
 
       - name: Activate virtual environment
         working-directory: /home/ec2-user/dbt_setup
