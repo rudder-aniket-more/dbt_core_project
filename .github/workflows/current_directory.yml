@@ -50,7 +50,7 @@ jobs:
         run: cd /home/ec2-user/dbt_setup/snowflake
         
       - name: print pwd
-        run: pwd
+        run: dbt build
 
       - name: Run dbt models
         working-directory: /home/ec2-user/dbt_setup/snowflake
